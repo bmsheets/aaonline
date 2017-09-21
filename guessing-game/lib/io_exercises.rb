@@ -27,3 +27,17 @@ def guessing_game
     end
     puts "Congratulations, you found the secret number #{number} in #{num_guesses} tries!"
 end
+
+def file_shuffler
+    file_name = ARGV[0]
+    new_file_name = file_name + "-shuffled.txt"
+    shuffle = File.readlines(file_name).shuffle
+    File.open(new_file_name, "w") do |file|
+        shuffle.each do |line|
+            file.puts line
+        end
+    end
+end
+
+#guessing_game
+#file_shuffler
