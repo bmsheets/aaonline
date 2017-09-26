@@ -10,10 +10,14 @@ class Board
         grid[position.first][position.last] = mark
     end
 
+    def remove_mark(position)
+      grid[position.first][position.last] = nil
+    end
+
     def empty?(position)
         grid[position.first][position.last] == nil
     end
-    
+
     def winner
         return nil unless over?
         all_row_col_diag.each do |row|
@@ -34,7 +38,7 @@ class Board
     end
 
     def all_row_col_diag
-        result = []      
+        result = []
         # add columns
         result << grid[0]
         result << grid[1]
