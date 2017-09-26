@@ -1,5 +1,5 @@
 class Code
-    PEG_TABLE = {
+    PEGS = {
         "R" => :red,
         "G" => :green,
         "B" => :blue,
@@ -12,11 +12,20 @@ class Code
     def initialize(pegs)
         @pegs = pegs
     end
+
+    def [](i)
+        pegs[i]
+    end
+
+    def ==(other_code)
+        return false if !other_code.is_a?(Code)
+        self.pegs == other_code.pegs
+    end
     
     def self.random
         pegs = []
         4.times do 
-            pegs << PEG_TABLE.keys.sample
+            pegs << PEGS.keys.sample
         end
         Code.new(pegs)
     end 
@@ -24,7 +33,7 @@ class Code
     def self.parse(input)
         pegs = []
         input.chars.each do |char|
-            if PEG_TABLE.keys.include?(char.upcase) && pegs.length < 5
+            if PEGS.keys.include?(char.upcase) && pegs.length < 5
                 pegs << char.upcase
             else
                 raise "Invalid peg input given."
@@ -43,13 +52,21 @@ class Code
     end
 
     def near_matches(other_code)
-        count = 0
-        self.pegs.each_with_index do |peg, idx|
-            if peg != other_code.pegs[idx] && other_code.pegs.include?(peg)
-                count += 1
-            end
+        matches = 0
+        other_count = other_code.color_count
+        self.color_count.each do |color, count|
+            next unless other_count.include?(color)
+            matches += [count, other_count[color]].min 
         end
-        count 
+        matches - exact_matches(other_code)
+    end
+
+    def color_count
+        count = Hash.new(0)
+        pegs.each do |peg|
+            count[peg] += 1
+        end
+        count
     end
 end
 
@@ -57,19 +74,19 @@ class Game
     attr_reader :secret_code
     attr_accessor :num_turns
 
-    def initialize
+    def initialize(secret_code = Code.random)
         @num_turns = 0
-        @secret_code = Code.random
-        puts secret_code.pegs
+        @secret_code = secret_code
+        #puts secret_code.pegs
     end
     
     def play
         puts "Welcome to mastermind."
         guess = get_guess
-        report_matches(guess)
+        display_matches(guess)
         until game_over?(guess)
             guess = get_guess
-            report_matches(guess)
+            display_matches(guess)
         end
     end
 
@@ -83,16 +100,16 @@ class Game
        num_turns >= 10 || secret_code.exact_matches(guess) == 4
     end
 
-    def report_matches(guess)
+    def display_matches(guess)
         exact = secret_code.exact_matches(guess)
         near = secret_code.near_matches(guess)
         if exact == 4
             puts "Congratulations, you win!"
         else
-            puts "Exact matches: #{exact}, Near matches: #{near}"
+            puts "exact matches: #{exact}, near matches: #{near}"
         end
     end
 end
 
-game = Game.new
-game.play
+#game = Game.new
+#game.play
